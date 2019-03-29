@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!--<script src="https://d3js.org/d3.v5.min.js"></script>-->
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <title>index</title>
+    <script>
+        function transitions ()
+        {
+            var myData = [134, 450, 230, 1980];
+            var height = 380;
+            var width = 500;
+
+            var tooltip = d3.select('body').append('div')
+                .style('position', 'absolute')
+                .style('background', '#f4f4f4')
+                .style('padding', '20 25px')
+                .style('font-family','Arial')
+                .style('border-radius', '3px')
+                .style('opacity', '0');
+
+            var label = d3.select('body').append('div')
+                .style('position', 'absolute')
+                .style('background', '#f4f4f4')
+                .style('padding', '20 25px')
+                .style('font-family','Arial')
+                .style('border-radius', '3px')
+                .style('opacity', '0');
+
+            var animateDuration = 1000;
+            var animateDelay = 100;
+
+            var yScale = d3.scale.linear()
+                .domain([0, d3.max(myData)])
+                .range([0, height-70]);
+            var xScale = d3.scale.ordinal()
+                .domain(d3.range(0, myData.length))
+                .rangeBands([0, width]);
+
+            var colors = d3.scale.linear()
+                .domain([0, myData.length])
+                .range(["#41e0fc","#4056fc"]);
+
+            var canvas = d3.select("#chart")
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height)
+                .style('padding', '50px');
+
+            var myChart = canvas
+                .selectAll('rect')
+                .data(myData)
+                .enter().append('rect')
+                .style('fill', function (d, i) {
+                    return colors(i);
+                })
+                .attr('width', xScale.rangeBand())
+                .attr('height', height)
+                .attr('x', function (d, i) {
+                    // return i * (barWidth + barOffset);
+                    return xScale(i);
+                })
+                .attr('y', height)
+                .on('mouseover', function (d) {
+                    tooltip.transition()
+                        .style('opacity', 1);
+
+                    tooltip.html(d)
+                        .style('left', (d3.event.pageX) + 'px')
+                        .style('top', (d3.event.pageY + 'px'))
+                    d3.select(this).style('opacity', 0.5)
+                })
+                .on('mouseout', function (d) {
+                    tooltip.transition()
+                        .style('opacity', 0);
+                    d3.select(this).style('opacity', 1)
+                });
+
+            myChart.transition()
+                .attr('height', function (d) {
+                    return yScale(d);
+                })
+                .attr('y', function (d) {
+                    return height -32 - yScale(d)
+                })
+                .duration(animateDuration)
+                .delay(function (d, i) {
+                    return i* animateDelay*1.5
+                })
+                .ease('elastic');
+
+            var myText = canvas.selectAll("text.values")
+                 .data(myData)
+                 .enter()
+                 .append('text')
+                .transition()
+                .delay(function (d, i) {
+                    return i* animateDelay*3
+                })
+                 .attr('fill', '#291da5')
+                 .attr('x', function (d,i) {
+                     return i * 120 + 50
+                 })
+                 .attr('y', 30)
+                 .text(function (d) {
+                     return d
+                 })
+                 .style('font-family', 'Arial')
+                 .style('font-size', '30px');
+
+            var keys = ['basic and clinical',  'scientisits', 'clinical researchers', '/investigators',
+                'trainee ','researchers', 'research support',' staff'];
+
+            var myKeys = canvas.selectAll("text.labels")
+                .data(keys)
+                .enter()
+                .append('text')
+                .attr('x', function (d,t) {
+                    if((t)%2 == 1){
+                        return (t-1)/2*130
+                    }
+                    return t/2*130
+                })
+
+                .attr('y', function (d, i) {
+                    if((i+1)%2 == 1){
+                        return 360
+                    }
+                    else {
+                        return 375
+                    }
+                })
+                .text(function (d) {
+                    return d
+                })
+                .transition()
+                .delay(function (d, t) {
+                    if((t)%2 == 1){
+                        return (t-1)/2*animateDelay*3
+                    }
+                    return t/2*animateDelay*3
+                })
+                .style('font-family', 'Arial')
+                .style('font-size', '14px')
+
+        }
+
+    </script>
+</head>
+<body>
+<div id="chart"></div>
+<script>
+    transitions ();
+</script>
+</body>
+</html>
